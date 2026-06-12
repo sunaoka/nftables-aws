@@ -41,11 +41,11 @@ def write_nft_header(file):
     file.write("\n")
 
     if args.regions is not None:
-        file.write("# \tregions: {}\n".format(args.regions))
+        file.write("#  regions: {}\n".format(args.regions))
     if args.services is not None:
-        file.write("# \tservices: {}\n".format(args.services))
+        file.write("#  services: {}\n".format(args.services))
     if args.networkbordergroups is not None:
-        file.write("# \tnetwork-border-group: {}\n".format(args.networkbordergroups))
+        file.write("#  network-border-group: {}\n".format(args.networkbordergroups))
     file.write("\n\n\n")
 
 
@@ -62,9 +62,9 @@ def write_nft_file(file, ipList, ipv6=False):
 
     file.seek(0)
     write_nft_header(file)
-    file.write("set {} {{\n\ttype {}\n\tflags interval, constant\n\telements = {{\n".format(setname, type))
-    file.write("".join("\t\t{},\n".format(ip) for ip in ipList))
-    file.write("\t}\n")
+    file.write("set {} {{\n    type {}\n    flags interval, constant\n    elements = {{\n".format(setname, type))
+    file.write("".join("        {},\n".format(ip) for ip in ipList))
+    file.write("    }\n")
     file.write("}\n")
     file.truncate()
 
