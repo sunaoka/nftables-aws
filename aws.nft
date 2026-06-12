@@ -1,0 +1,17 @@
+#!/usr/sbin/nft -f
+
+table inet aws {
+
+    include "aws-ipv4.nft"
+    include "aws-ipv6.nft"
+
+    chain aws-input {
+        type filter hook input priority -1; policy accept;
+        ip saddr @awsip4 drop
+        ip6 saddr @awsip6 drop
+    }
+
+    chain input {
+        type filter hook input priority 0; policy accept;
+    }
+}
