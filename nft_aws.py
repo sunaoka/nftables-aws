@@ -72,33 +72,35 @@ def write_nft_file(file, ipList, ipv6=False):
     file.truncate()
 
 
-#ToDo: This function is very slow, must to be optimized
 def clean_ip_list(iplist, ipv6=False):
     """
     Remove overlapped networks
     """
-    lenIplist = len(iplist)
-    forremove = []
-    for i, ip1 in enumerate(iplist):
-        network1 = ip.ip_network(ip1)
-        for j in range(i,lenIplist):
-            if i == j:
-                continue
-            network2 = ip.ip_network(iplist[j])
-            if(network1.overlaps(network2)):
-                #The small subnet is included on the big subnet
-                if(network1.num_addresses > network2.num_addresses):
-                    forremove.append(iplist[j])
-                else:
-                    forremove.append(ip1)
+    networks = []
+    count_by_network = {}
+    last_index_by_network = {}
+    for index, subnet in enumerate(iplist):
+        network = ip.ip_network(subnet)
+        networks.append((index, subnet, network))
+        count_by_network[network] = count_by_network.get(network, 0) + 1
+        last_index_by_network[network] = index
 
+    network_set = set(count_by_network)
+    forremove = set()
+    for index, subnet, network in networks:
+        if count_by_network[network] > 2:
+            forremove.add(index)
+            continue
+        if last_index_by_network[network] != index:
+            forremove.add(index)
+            continue
+        for prefixlen in range(network.prefixlen):
+            if network.supernet(new_prefix=prefixlen) in network_set:
+                forremove.add(index)
+                break
 
-    #Remove the object if exists
-    for ips in forremove:
-        try:
-            iplist.remove(ips)
-        except:
-            pass
+    iplist[:] = [subnet for index, subnet in enumerate(iplist)
+                 if index not in forremove]
 
 
 def extract_ip_list(subnets, ipv6=False):
