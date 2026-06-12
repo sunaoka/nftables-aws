@@ -21,8 +21,11 @@ Generate files containing nftables sets with AWS IPS
 
 from datetime import datetime
 import ipaddress as ip
-import requests
 import argparse
+import json
+import sys
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
 
 AWS_URL = "https://ip-ranges.amazonaws.com/ip-ranges.json"
 
@@ -203,12 +206,20 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Downloading json from {}".format(AWS_URL))
-    r = requests.get(AWS_URL)
+    try:
+        with urlopen(AWS_URL) as response:
+            status_code = response.getcode()
+            data = response.read().decode("utf-8")
+    except HTTPError as error:
+        sys.exit("Error downloading AWS IP list: HTTP {}".format(error.code))
+    except URLError as error:
+        sys.exit("Error downloading AWS IP list: {}".format(error.reason))
+
     print("------")
 
-    if r.status_code == 200:
+    if status_code == 200:
         print("Decoding json...")
-        jsonAwsIp = r.json()
+        jsonAwsIp = json.loads(data)
 
         print("Filter results...")
         subnetList4 = filter_ip_list(jsonAwsIp['prefixes'])
