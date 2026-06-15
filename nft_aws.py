@@ -201,7 +201,6 @@ def create_parser():
     parser.add_argument(
         "-o",
         "--output-ipv4-file",
-        type=argparse.FileType("w"),
         default="aws-ipv4.nft",
         help="File where the ipv4 set will be overwritted ",
         required=False,
@@ -210,7 +209,6 @@ def create_parser():
     parser.add_argument(
         "-O",
         "--output-ipv6-file",
-        type=argparse.FileType("w"),
         default="aws-ipv6.nft",
         help="File where the ipv4 set will be overwritted ",
         required=False,
@@ -251,8 +249,10 @@ if __name__ == "__main__":
         clean_ip_list(ipList6)
 
         print("Writting to files...")
-        write_nft_file(args.ipv4file, ipList4)
-        write_nft_file(args.ipv6file, ipList6, ipv6=True)
+        with open(args.ipv4file, "w", encoding="utf-8") as ipv4file:
+            write_nft_file(ipv4file, ipList4)
+        with open(args.ipv6file, "w", encoding="utf-8") as ipv6file:
+            write_nft_file(ipv6file, ipList6, ipv6=True)
 
         print("------")
         print(
