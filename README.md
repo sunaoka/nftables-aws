@@ -49,8 +49,8 @@ Here is a example for block AWS IPS. The `aws.nft` file will be like this:
 
 table inet aws {
 
-    include "aws-ipv4.nft"
-    include "aws-ipv6.nft"
+    include "./aws-ipv4.nft"
+    include "./aws-ipv6.nft"
 
     chain aws-input {
         type filter hook input priority -1; policy accept;

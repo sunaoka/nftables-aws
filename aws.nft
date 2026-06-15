@@ -2,8 +2,8 @@
 
 table inet aws {
 
-    include "aws-ipv4.nft"
-    include "aws-ipv6.nft"
+    include "./aws-ipv4.nft"
+    include "./aws-ipv6.nft"
 
     chain aws-input {
         type filter hook input priority -1; policy accept;
