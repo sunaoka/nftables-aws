@@ -1,0 +1,40 @@
+name: Update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "10 0 * * *"
+
+jobs:
+  update-dist:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Generate nftables sets
+        run: |
+          mkdir -p dist
+          python nft_aws.py \
+            --output-ipv4-file dist/aws-ipv4.nft \
+            --output-ipv6-file dist/aws-ipv6.nft
+
+      - name: Commit generated files
+        run: |
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git add dist/aws-ipv4.nft dist/aws-ipv6.nft
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Update generated AWS nftables sets"
+          git push
